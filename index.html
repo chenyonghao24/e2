@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SWP09 英文聽讀練習 APP</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+    /* Header */
+    header { background: #fff; border-bottom: 1px solid var(--border); padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .header-brand { display: flex; align-items: center; gap: 14px; }
+    .brand-icon { width: 44px; height: 44px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; }
+    .brand-title { font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .badge { font-size: 0.75rem; background: #ecfdf5; color: #059669; padding: 2px 8px; border-radius: 9999px; font-weight: 600; border: 1px solid #a7f3d0; }
+    .brand-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+    .header-actions { display: flex; gap: 10px; }
+
+    /* Buttons */
+    .btn { padding: 8px 16px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-outline { background: #fff; border-color: var(--border); color: var(--text); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .btn-danger-outline { background: #fff; border-color: #fecaca; color: var(--danger); }
+    .btn-danger-outline:hover { background: #fef2f2; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-dark { background: #0f172a; color: white; }
+    .btn-dark:hover { background: #1e293b; }
+    .btn-dark.recording { background: var(--danger); animation: pulse 1.5s infinite; }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+
+    /* Container */
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 20px; }
+
+    /* Top Stats Grid */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; }
+    .stat-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+    .stat-val { font-size: 1.8rem; font-weight: 800; }
+    .stat-icon { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+    /* Mode Selector Bar */
+    .mode-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+    .mode-btn { padding: 12px 28px; border-radius: 9999px; font-size: 1rem; font-weight: 700; border: none; cursor: pointer; background: #e2e8f0; color: var(--text-muted); transition: 0.2s; }
+    .mode-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+
+    /* Main Content Layout */
+    .main-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
+
+    /* Card Left */
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.02); }
+    .card-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .category-pill { background: #e0e7ff; color: #4338ca; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+
+    .word-section { text-align: center; margin: 30px 0; }
+    .word-text { font-size: 3.2rem; font-weight: 900; letter-spacing: -0.5px; color: #0f172a; margin-bottom: 8px; }
+    .word-meta { font-size: 1.15rem; color: var(--text-muted); margin-bottom: 24px; display: flex; justify-content: center; gap: 14px; align-items: center; }
+    .phonetic { font-family: "Lucida Sans Unicode", sans-serif; color: #6366f1; background: #eef2ff; padding: 2px 8px; border-radius: 6px; }
+    .example-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; font-style: italic; color: #334155; font-size: 1.05rem; margin: 0 auto 30px; max-width: 90%; }
+
+    .action-row { display: flex; justify-content: center; gap: 14px; margin-bottom: 28px; }
+    .action-row .btn { padding: 14px 26px; font-size: 1.05rem; border-radius: 12px; }
+
+    /* Result Panel */
+    .result-panel { background: #f8fafc; border: 1px dashed var(--border); border-radius: 12px; padding: 18px 20px; }
+    .result-header { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
+    .transcript-box { font-size: 1rem; color: var(--text); min-height: 24px; }
+    .feedback-msg { margin-top: 8px; font-size: 1rem; font-weight: 700; }
+    .feedback-msg.correct { color: var(--success); }
+    .feedback-msg.wrong { color: var(--danger); }
+
+    /* Quiz Panel (Hidden by default) */
+    .quiz-panel { display: none; text-align: center; }
+    .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 24px; }
+    .quiz-opt-btn { padding: 18px; border: 2px solid var(--border); background: white; border-radius: 12px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .quiz-opt-btn:hover { border-color: var(--primary); background: #f5f3ff; }
+
+    /* Word List Right */
+    .list-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 24px; display: flex; flex-direction: column; max-height: 720px; }
+    .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .list-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .search-input { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; font-size: 0.9rem; }
+    .tag-filter { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 12px; }
+    .tag-btn { padding: 4px 12px; font-size: 0.8rem; font-weight: 600; border-radius: 9999px; border: 1px solid var(--border); background: white; cursor: pointer; white-space: nowrap; }
+    .tag-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    .word-items { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 8px; padding-right: 4px; }
+    .word-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border: 1px solid var(--border); border-radius: 12px; cursor: pointer; transition: 0.2s; }
+    .word-item:hover { border-color: var(--primary); background: #fdfdfd; }
+    .word-item.active { border-color: var(--primary); background: #f5f3ff; }
+    .item-left { display: flex; align-items: baseline; gap: 10px; }
+    .item-idx { font-size: 0.8rem; color: var(--text-muted); font-weight: bold; width: 18px; }
+    .item-en { font-weight: 700; font-size: 1rem; }
+    .item-zh { font-size: 0.85rem; color: var(--text-muted); }
+
+    /* Modal */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: white; padding: 24px; border-radius: 16px; width: 360px; max-width: 90%; }
+    .modal-row { margin: 16px 0; }
+    .modal-row label { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+
+    @media (max-width: 900px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .main-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 頂部導航 -->
+  <header>
+    <div class="header-brand">
+      <div class="brand-icon">🎧</div>
+      <div>
+        <div class="brand-title">SWP09 英文聽讀練習 APP <span class="badge">精選單字庫</span></div>
+        <div class="brand-sub">聽音辨單字 × 口說跟讀比對 × Web Speech API</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" id="open-settings-btn">⚙️ 語音設定</button>
+      <button class="btn btn-danger-outline" id="reset-stats-btn">🔄 重設統計</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 頂部數據看板 -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div><div class="stat-title">練習題數</div><div class="stat-val" id="total-stat">0</div></div>
+        <div class="stat-icon" style="background: #eff6ff; color: #2563eb;">📖</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="stat-title">答對題數</div><div class="stat-val" id="correct-stat" style="color: var(--success);">0</div></div>
+        <div class="stat-icon" style="background: #ecfdf5; color: var(--success);">✔</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="stat-title">正確率 (Accuracy)</div><div class="stat-val" id="rate-stat" style="color: #6366f1;">0%</div></div>
+        <div class="stat-icon" style="background: #eef2ff; color: #6366f1;">🎯</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="stat-title">連續答對 (Streak)</div><div class="stat-val" id="streak-stat" style="color: var(--warning);">0</div></div>
+        <div class="stat-icon" style="background: #fffbeb; color: var(--warning);">🔥</div>
+      </div>
+    </div>
+
+    <!-- 模式選擇 -->
+    <div class="mode-bar">
+      <button class="mode-btn active" id="mode-speaking-btn">🎤 口說跟讀模式 (Speaking)</button>
+      <button class="mode-btn" id="mode-quiz-btn">🔊 聽音辨單字 (Listening Quiz)</button>
+    </div>
+
+    <!-- 主區塊 -->
+    <div class="main-grid">
+      
+      <!-- 左側互動練習卡片 -->
+      <div class="card">
+        <div class="card-nav">
+          <span class="category-pill" id="display-category">日常核心</span>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button class="btn btn-outline" id="prev-btn" style="padding: 4px 10px;">〈</button>
+            <span style="font-size: 0.9rem; font-weight: bold; color: var(--text-muted);" id="index-tracker">1 / 25</span>
+            <button class="btn btn-outline" id="next-btn" style="padding: 4px 10px;">〉</button>
+          </div>
+        </div>
+
+        <!-- 模式一：口說跟讀介面 -->
+        <div id="speaking-container">
+          <div class="word-section">
+            <div class="word-text" id="display-word">Opportunity</div>
+            <div class="word-meta">
+              <span class="phonetic" id="display-phonetic">/ˌɑː.pɚˈtuː.nə.t̬i/</span>
+              <span id="display-zh">機會；良機</span>
+            </div>
+            <div class="example-box" id="display-sentence">"Don't miss this rare opportunity."</div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-primary" id="btn-speak-tts">🔊 示範發音 (TTS)</button>
+            <button class="btn btn-dark" id="btn-record">🎤 按下錄音並跟讀</button>
+          </div>
+
+          <div class="result-panel">
+            <div class="result-header">
+              <span>即時學習成果回饋</span>
+              <span id="status-tag">等待輸入</span>
+            </div>
+            <div class="transcript-box" id="transcript-box">語音轉文字偵測：尚未錄音</div>
+            <div class="feedback-msg" id="feedback-msg"></div>
+          </div>
+        </div>
+
+        <!-- 模式二：聽力測驗介面 -->
+        <div id="quiz-container" class="quiz-panel">
+          <div style="margin: 40px 0;">
+            <div style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 16px;">仔細聆聽發音，選出正確的單字：</div>
+            <button class="btn btn-primary" id="btn-quiz-play" style="font-size: 1.2rem; padding: 16px 32px; border-radius: 9999px;">🔊 播放題目語音</button>
+          </div>
+          <div class="quiz-options" id="quiz-options-group"></div>
+          <div id="quiz-feedback" style="margin-top: 20px; font-weight: bold; font-size: 1.1rem;"></div>
+        </div>
+
+      </div>
+
+      <!-- 右側單字列表 -->
+      <div class="list-card">
+        <div class="list-header">
+          <div class="list-title">📚 單字庫清單 (<span id="total-words-count">25</span> 字)</div>
+        </div>
+
+        <input type="text" class="search-input" id="search-box" placeholder="🔍 搜尋英文或中文釋義...">
+
+        <div class="tag-filter">
+          <button class="tag-btn active" data-cat="all">全部</button>
+          <button class="tag-btn" data-cat="初階基礎">初階基礎</button>
+          <button class="tag-btn" data-cat="日常核心">日常核心</button>
+          <button class="tag-btn" data-cat="進階挑戰">進階挑戰</button>
+          <button class="tag-btn" data-cat="職場商務">職場商務</button>
+          <button class="tag-btn" data-cat="生活片語">生活片語</button>
+        </div>
+
+        <div class="word-items" id="word-list-box"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 語音設定 Modal -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal">
+      <h3 style="margin-bottom: 16px;">⚙️ 語音合成偏好設定</h3>
+      <div class="modal-row">
+        <label>語速 (Speed): <span id="rate-val">1.0x</span></label>
+        <input type="range" id="rate-range" min="0.5" max="1.5" step="0.1" value="1.0" style="width: 100%;">
+      </div>
+      <div class="modal-row">
+        <label>音調 (Pitch): <span id="pitch-val">1.0</span></label>
+        <input type="range" id="pitch-range" min="0.5" max="1.5" step="0.1" value="1.0" style="width: 100%;">
+      </div>
+      <button class="btn btn-primary" id="close-settings-btn" style="width: 100%; margin-top: 14px; justify-content: center;">確認儲存</button>
+    </div>
+  </div>
+
+  <script>
+    // 豐富單字題庫（初階 -> 進階 -> 商務片語）
+    const wordBank = [
+      { en: "Apple", zh: "蘋果", phonetic: "/ˈæp.əl/", cat: "初階基礎", sentence: "She eats an apple every morning." },
+      { en: "Banana", zh: "香蕉", phonetic: "/bəˈnæn.ə/", cat: "初階基礎", sentence: "Monkeys like to eat sweet bananas." },
+      { en: "Travel", zh: "旅行", phonetic: "/ˈtræv.əl/", cat: "初階基礎", sentence: "They love to travel around the world." },
+      { en: "Water", zh: "水", phonetic: "/ˈwɑː.t̬ɚ/", cat: "初階基礎", sentence: "Drink plenty of water every single day." },
+      { en: "Friend", zh: "朋友", phonetic: "/frend/", cat: "初階基礎", sentence: "A true friend is always there for you." },
+      
+      { en: "Opportunity", zh: "機會；良機", phonetic: "/ˌɑː.pɚˈtuː.nə.t̬i/", cat: "日常核心", sentence: "Don't miss this rare opportunity." },
+      { en: "Confidence", zh: "自信；信心", phonetic: "/ˈkɑːn.fə.dəns/", cat: "日常核心", sentence: "She spoke with great confidence on stage." },
+      { en: "Environment", zh: "自然環境；周遭", phonetic: "/ɪnˈvaɪ.rən.mənt/", cat: "日常核心", sentence: "We must take action to protect our environment." },
+      { en: "Technology", zh: "科技；技術", phonetic: "/tekˈnɑː.lə.dʒi/", cat: "日常核心", sentence: "Modern technology has changed our life style." },
+      { en: "Communication", zh: "溝通；交流", phonetic: "/kəˌmjuː.nəˈkeɪ.ʃən/", cat: "日常核心", sentence: "Clear communication prevents misunderstandings." },
+
+      { en: "Perseverance", zh: "堅持不懈；毅力", phonetic: "/ˌpɝː.səˈvɪr.əns/", cat: "進階挑戰", sentence: "Success requires perseverance and patience." },
+      { en: "Ubiquitous", zh: "無所不在的", phonetic: "/juːˈbɪk.wə.t̬əs/", cat: "進階挑戰", sentence: "Smartphones have become ubiquitous nowadays." },
+      { en: "Metaphor", zh: "隱喻；暗喻", phonetic: "/ˈmet̬.ə.fɔːr/", cat: "進階挑戰", sentence: "The poem makes rich use of metaphor." },
+      { en: "Spontaneous", zh: "自發的；率性的", phonetic: "/spɑːnˈteɪ.ni.əs/", cat: "進階挑戰", sentence: "We took a spontaneous road trip yesterday." },
+      { en: "Resilient", zh: "有韌性的；適應力強的", phonetic: "/rɪˈzɪl.jənt/", cat: "進階挑戰", sentence: "He is resilient enough to overcome any defeat." },
+
+      { en: "Negotiation", zh: "商務談判；協商", phonetic: "/nəˌɡoʊ.ʃiˈeɪ.ʃən/", cat: "職場商務", sentence: "The contract negotiation took several weeks." },
+      { en: "Collaboration", zh: "跨團隊合作", phonetic: "/kəˌlæb.əˈreɪ.ʃən/", cat: "職場商務", sentence: "Team collaboration is key to this project." },
+      { en: "Strategy", zh: "策略；戰略", phonetic: "/ˈstræt̬.ə.dʒi/", cat: "職場商務", sentence: "Our marketing strategy worked out perfectly." },
+      { en: "Efficiency", zh: "效率；效能", phonetic: "/ɪˈfɪʃ.ən.si/", cat: "職場商務", sentence: "Automating tasks will greatly improve efficiency." },
+      { en: "Innovation", zh: "創新；革新", phonetic: "/ˌɪn.əˈveɪ.ʃən/", cat: "職場商務", sentence: "Innovation drives company growth constantly." },
+
+      { en: "Piece of cake", zh: "小菜一碟；輕而易舉", phonetic: "/piːs əv keɪk/", cat: "生活片語", sentence: "Don't worry, this math test is a piece of cake." },
+      { en: "Under the weather", zh: "身體不適；微恙", phonetic: "/ˈʌn.dɚ ðə ˈweð.ɚ/", cat: "生活片語", sentence: "I am feeling a bit under the weather today." },
+      { en: "Break a leg", zh: "祝你演出順利；加油", phonetic: "/breɪk ə leɡ/", cat: "生活片語", sentence: "Break a leg at your concert tonight!" },
+      { en: "Hit the books", zh: "用功讀書", phonetic: "/hɪt ðə bʊks/", cat: "生活片語", sentence: "I have final exams tomorrow, so I need to hit the books." },
+      { en: "Call it a day", zh: "今天就到此為止吧", phonetic: "/kɑːl ɪt ə deɪ/", cat: "生活片語", sentence: "We have done enough work, let's call it a day." }
+    ];
+
+    // 全域變數
+    let currentIndex = 0;
+    let filteredList = [...wordBank];
+    let currentFilterCat = "all";
+    let stats = { total: 0, correct: 0, streak: 0 };
+    let ttsRate = 1.0;
+    let ttsPitch = 1.0;
+    let isRecording = false;
+
+    // DOM 快取
+    const wordEl = document.getElementById("display-word");
+    const phoneticEl = document.getElementById("display-phonetic");
+    const zhEl = document.getElementById("display-zh");
+    const sentenceEl = document.getElementById("display-sentence");
+    const categoryEl = document.getElementById("display-category");
+    const indexTracker = document.getElementById("index-tracker");
+    const recordBtn = document.getElementById("btn-record");
+    const transcriptBox = document.getElementById("transcript-box");
+    const feedbackMsg = document.getElementById("feedback-msg");
+    const statusTag = document.getElementById("status-tag");
+    const wordListBox = document.getElementById("word-list-box");
+
+    // 初始化載入
+    window.addEventListener("DOMContentLoaded", () => {
+      renderWordList();
+      loadWord(0);
+      setupRecognition();
+    });
+
+    // 載入指定索引單字
+    function loadWord(index) {
+      if (filteredList.length === 0) return;
+      currentIndex = index;
+      const item = filteredList[currentIndex];
+      
+      wordEl.innerText = item.en;
+      phoneticEl.innerText = item.phonetic;
+      zhEl.innerText = item.zh;
+      sentenceEl.innerText = `"${item.sentence}"`;
+      categoryEl.innerText = item.cat;
+      indexTracker.innerText = `${currentIndex + 1} / ${filteredList.length}`;
+
+      // 成果回饋重設
+      transcriptBox.innerText = "語音轉文字偵測：等待錄音...";
+      feedbackMsg.innerText = "";
+      feedbackMsg.className = "feedback-msg";
+      statusTag.innerText = "等待輸入";
+
+      highlightListItem();
+      if (document.getElementById("quiz-container").style.display === "block") {
+        renderQuiz();
+      }
+    }
+
+    // 渲染右側列表
+    function renderWordList() {
+      wordListBox.innerHTML = "";
+      document.getElementById("total-words-count").innerText = filteredList.length;
+
+      filteredList.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = `word-item ${idx === currentIndex ? 'active' : ''}`;
+        div.innerHTML = `
+          <div class="item-left">
+            <span class="item-idx">${idx + 1}</span>
+            <span class="item-en">${item.en}</span>
+            <span class="item-zh">${item.zh}</span>
+          </div>
+          <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem;" onclick="speakDirect('${item.en}', event)">🔊</button>
+        `;
+        div.addEventListener("click", () => loadWord(idx));
+        wordListBox.appendChild(div);
+      });
+    }
+
+    function highlightListItem() {
+      const items = wordListBox.querySelectorAll(".word-item");
+      items.forEach((it, i) => {
+        if (i === currentIndex) it.classList.add("active");
+        else it.classList.remove("active");
+      });
+    }
+
+    // 發音 TTS 功能
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) {
+        alert("瀏覽器不支援 SpeechSynthesis");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "en-US";
+      utter.rate = ttsRate;
+      utter.pitch = ttsPitch;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakDirect(txt, e) {
+      e.stopPropagation();
+      speakText(txt);
+    }
+
+    document.getElementById("btn-speak-tts").addEventListener("click", () => {
+      speakText(filteredList[currentIndex].en);
+    });
+
+    // 語音辨識 STT 功能
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+
+    function setupRecognition() {
+      if (!SpeechRecognition) {
+        transcriptBox.innerText = "瀏覽器不支援 SpeechRecognition，請使用 Google Chrome。";
+        return;
+      }
+
+      recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.interimResults = false;
+
+      recordBtn.addEventListener("click", () => {
+        if (isRecording) {
+          recognition.stop();
+          return;
+        }
+        try {
+          recognition.start();
+          isRecording = true;
+          recordBtn.innerText = "🛑 正在聆聽中...請朗讀";
+          recordBtn.classList.add("recording");
+          statusTag.innerText = "錄音中";
+        } catch(e) {
+          console.error(e);
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.trim().toLowerCase();
+        const target = filteredList[currentIndex].en.trim().toLowerCase();
+        
+        // 簡單去除非英文字元標點符號進行寬鬆比對
+        const cleanTranscript = transcript.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+        const cleanTarget = target.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+
+        transcriptBox.innerText = `辨識文字偵測：${transcript}`;
+
+        const isMatch = (cleanTranscript === cleanTarget) || cleanTranscript.includes(cleanTarget);
+
+        updateStats(isMatch);
+
+        if (isMatch) {
+          feedbackMsg.innerText = "🎉 辨識正確！發音非常標準！";
+          feedbackMsg.className = "feedback-msg correct";
+          statusTag.innerText = "通過";
+        } else {
+          feedbackMsg.innerText = `❌ 發音不夠精確，預期為 "${filteredList[currentIndex].en}"，再試一次！`;
+          feedbackMsg.className = "feedback-msg wrong";
+          statusTag.innerText = "未通過";
+        }
+      };
+
+      recognition.onend = () => {
+        isRecording = false;
+        recordBtn.innerText = "🎤 按下錄音並跟讀";
+        recordBtn.classList.remove("recording");
+      };
+
+      recognition.onerror = (e) => {
+        isRecording = false;
+        recordBtn.innerText = "🎤 按下錄音並跟讀";
+        recordBtn.classList.remove("recording");
+        statusTag.innerText = "錄音出錯";
+        feedbackMsg.innerText = "語音辨識錯誤：" + e.error;
+      };
+    }
+
+    // 數據統計更新
+    function updateStats(isSuccess) {
+      stats.total++;
+      if (isSuccess) {
+        stats.correct++;
+        stats.streak++;
+      } else {
+        stats.streak = 0;
+      }
+
+      document.getElementById("total-stat").innerText = stats.total;
+      document.getElementById("correct-stat").innerText = stats.correct;
+      document.getElementById("streak-stat").innerText = stats.streak;
+      const rate = Math.round((stats.correct / stats.total) * 100);
+      document.getElementById("rate-stat").innerText = `${rate}%`;
+    }
+
+    document.getElementById("reset-stats-btn").addEventListener("click", () => {
+      stats = { total: 0, correct: 0, streak: 0 };
+      document.getElementById("total-stat").innerText = "0";
+      document.getElementById("correct-stat").innerText = "0";
+      document.getElementById("streak-stat").innerText = "0";
+      document.getElementById("rate-stat").innerText = "0%";
+    });
+
+    // 翻頁控制
+    document.getElementById("prev-btn").addEventListener("click", () => {
+      if (currentIndex > 0) loadWord(currentIndex - 1);
+    });
+
+    document.getElementById("next-btn").addEventListener("click", () => {
+      if (currentIndex < filteredList.length - 1) loadWord(currentIndex + 1);
+    });
+
+    // 搜尋與篩選
+    document.getElementById("search-box").addEventListener("input", (e) => {
+      applyFilter(e.target.value.toLowerCase(), currentFilterCat);
+    });
+
+    document.querySelectorAll(".tag-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilterCat = btn.dataset.cat;
+        applyFilter(document.getElementById("search-box").value.toLowerCase(), currentFilterCat);
+      });
+    });
+
+    function applyFilter(keyword, cat) {
+      filteredList = wordBank.filter(item => {
+        const matchesCat = (cat === "all") || (item.cat === cat);
+        const matchesSearch = item.en.toLowerCase().includes(keyword) || item.zh.includes(keyword);
+        return matchesCat && matchesSearch;
+      });
+      renderWordList();
+      loadWord(0);
+    }
+
+    // 模式切換：口說模式 VS 聽力辨字測驗
+    const speakingBtn = document.getElementById("mode-speaking-btn");
+    const quizBtn = document.getElementById("mode-quiz-btn");
+    const speakingContainer = document.getElementById("speaking-container");
+    const quizContainer = document.getElementById("quiz-container");
+
+    speakingBtn.addEventListener("click", () => {
+      speakingBtn.classList.add("active");
+      quizBtn.classList.remove("active");
+      speakingContainer.style.display = "block";
+      quizContainer.style.display = "none";
+    });
+
+    quizBtn.addEventListener("click", () => {
+      quizBtn.classList.add("active");
+      speakingBtn.classList.remove("active");
+      speakingContainer.style.display = "none";
+      quizContainer.style.display = "block";
+      renderQuiz();
+    });
+
+    function renderQuiz() {
+      const current = filteredList[currentIndex];
+      const optGroup = document.getElementById("quiz-options-group");
+      const quizFeedback = document.getElementById("quiz-feedback");
+      quizFeedback.innerText = "";
+      optGroup.innerHTML = "";
+
+      // 產生 4 個選項（1 正確 + 3 隨機）
+      let choices = [current];
+      let pool = wordBank.filter(w => w.en !== current.en);
+      pool.sort(() => 0.5 - Math.random());
+      choices.push(...pool.slice(0, 3));
+      choices.sort(() => 0.5 - Math.random());
+
+      choices.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.className = "quiz-opt-btn";
+        btn.innerText = `${opt.en} (${opt.zh})`;
+        btn.addEventListener("click", () => {
+          if (opt.en === current.en) {
+            quizFeedback.innerHTML = "<span style='color: var(--success);'>🎉 答對了！</span>";
+            updateStats(true);
+            setTimeout(() => {
+              if (currentIndex < filteredList.length - 1) loadWord(currentIndex + 1);
+            }, 1200);
+          } else {
+            quizFeedback.innerHTML = `<span style='color: var(--danger);'>❌ 答錯了，正解是：${current.en}</span>`;
+            updateStats(false);
+          }
+        });
+        optGroup.appendChild(btn);
+      });
+    }
+
+    document.getElementById("btn-quiz-play").addEventListener("click", () => {
+      speakText(filteredList[currentIndex].en);
+    });
+
+    // 語音設定彈窗
+    const modal = document.getElementById("settings-modal");
+    document.getElementById("open-settings-btn").addEventListener("click", () => modal.style.display = "flex");
+    document.getElementById("close-settings-btn").addEventListener("click", () => modal.style.display = "none");
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.style.display = "none"; });
+
+    document.getElementById("rate-range").addEventListener("input", (e) => {
+      ttsRate = parseFloat(e.target.value);
+      document.getElementById("rate-val").innerText = `${ttsRate.toFixed(1)}x`;
+    });
+
+    document.getElementById("pitch-range").addEventListener("input", (e) => {
+      ttsPitch = parseFloat(e.target.value);
+      document.getElementById("pitch-val").innerText = ttsPitch.toFixed(1);
+    });
+  </script>
+</body>
+</html>
